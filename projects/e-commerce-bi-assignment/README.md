@@ -1,120 +1,97 @@
-# E-Commerce analysis BI project
+# E-Commerce Sales & Logistics BI Analysis
 
-This project centralizes and models data from an e-commerce platform to
-provide visibility into commercial performance and operational logistics.
+This project models and analyzes transaction lifecycles for an e-commerce platform,
+integrating commercial revenue indicators and logistics transport performance
+into a star schema data warehouse connected to Metabase.
 
-## Technical environment
+---
 
-- Operating System: Fedora 44
-- Database: PostgreSQL (Docker)
-- ETL Tool: Pentaho Data Integration (Spoon 11)
-- Visualization: Metabase
+## Project Structure
 
-## Business requirements and metrics
-
-The solution implements eight fundamental key performance indicators:
-
-- Total revenue: The sum of net amounts for all sales.
-- Total orders: The global volume of recorded transactions.
-- Total quantity sold: The cumulative number of product units sold.
-- Average basket value: The mean financial value of an order.
-- Revenue by category or city: Distribution of value across product and
-  client axes.
-- Cancellation rate: The proportion of orders that do not complete.
-- Late delivery rate: The ratio of orders where the actual delivery date
-  exceeds the scheduled date.
-- Average delivery delay: The mean number of days for delayed deliveries.
-
-## Data warehouse design
-
-The project uses a star schema model to optimize query performance in
-Metabase.
-
-### Logical schema
-
-```mermaid
-erDiagram
-    dim_client ||--o{ fact_commande : "places"
-    dim_produit ||--o{ fact_commande : "concerns"
-    dim_transporteur ||--o{ fact_commande : "delivers"
-    dim_temps ||--o{ fact_commande : "on"
-
-    dim_client {
-        int client_pk PK
-        string id_client
-        string nom_client
-        string ville
-        string pays
-        string segment
-    }
-
-    dim_produit {
-        int produit_pk PK
-        string id_produit
-        string nom_produit
-        string categorie
-        string marque
-        float prix_unitaire
-    }
-
-    dim_transporteur {
-        int trans_pk PK
-        string id_transporteur
-        string nom_transporteur
-        string type_livraison
-    }
-
-    dim_temps {
-        int temps_pk PK
-        date date_complete
-        int annee
-        int mois
-        int jour
-    }
-
-    fact_commande {
-        int fact_id PK
-        int client_pk FK
-        int produit_pk FK
-        int trans_pk FK
-        int temps_pk FK
-        string id_commande
-        int quantite
-        float montant_brut
-        float montant_remise
-        float montant_net
-        int retard_jours
-        int indicateur_livraison_en_retard
-    }
+```text
+e-commerce-bi-assignment/
+├── README.md                          # Technical specification and architecture overview
+├── e-commerce-dashboard-performance.pdf # High-resolution export of supervisory dashboards
+├── data/                              # Source operational datasets
+│   ├── clients.csv                    # Customer segmentation and geographic attributes
+│   ├── commandes.csv                  # Order headers and timestamps
+│   ├── produits.csv                   # Catalog pricing and category taxonomy
+│   └── transporteurs.csv              # Delivery partner identities and SLA thresholds
+├── sql/                               # Relational Schema Definitions
+│   └── table-creation-postgres.txt    # DDL scripts creating dimension and fact tables
+├── etl/                               # Pentaho Data Integration (PDI) artifacts
+│   ├── Job.kjb                        # Master orchestration job
+│   ├── TR_Load_dim_client.ktr         # Client dimension loader
+│   ├── TR_Load_dim_produit.ktr        # Product dimension loader
+│   ├── TR_Load_dim_transporteur.ktr   # Logistics carrier dimension loader
+│   ├── TR_Load_dim_temps.ktr          # Temporal hierarchy generator
+│   └── TR_Load_fact_commande.ktr      # Central transactional order fact loader
+└── docs/                              # Comprehensive business reports and screenshots
+    ├── report_final.md                # Analytical thesis on commercial and carrier performance
+    └── img/                           # Dashboard views and transformation graphs
 ```
 
-## ETL implementation with Pentaho
+### File Responsibilities
 
-### Dimension loading
+- **`sql/table-creation-postgres.txt`**: Declares PostgreSQL schemas with appropriate foreign keys and indexing.
+- **`etl/Job.kjb`**: Orchestrator executing dimensional transformations in dependency order before triggering `TR_Load_fact_commande.ktr`.
+- **`docs/report_final.md`**: Business analysis assessing late delivery rates and basket value optimization.
 
-Transformations extract data from CSV files, apply cleaning processes, and
-load the data into PostgreSQL.
+---
 
-### Fact table loading
+## Star Schema Architecture
 
-The fact table transformation performs integrity joins and business
-calculations:
-- Net amount = (Quantity * Unit Price) - Discount
-- Delay = Actual Date - Scheduled Date
+```text
+       +-----------------------+              +-----------------------+
+       |       dim_client      |              |      dim_produit      |
+       | - id_client (PK)      |              | - id_produit (PK)     |
+       | - nom, ville, segment |              | - categorie, prix_un  |
+       +-----------------------+              +-----------------------+
+                   \                              /
+                    \                            /
+              +----------------------------------------+
+              |           fact_commande                |
+              | - id_commande (PK)                     |
+              | - id_client (FK)                       |
+              | - id_produit (FK)                      |
+              | - id_transporteur (FK)                 |
+              | - id_temps (FK)                        |
+              | - quantite, montant_net, retard_jours  |
+              +----------------------------------------+
+                    /                            \
+                   /                              \
+       +-----------------------+              +-----------------------+
+       |    dim_transporteur   |              |       dim_temps       |
+       | - id_transp (PK)      |              | - id_temps (PK)       |
+       | - nom_transp, delai   |              | - date, mois, trimestre|
+       +-----------------------+              +-----------------------+
+```
 
-## Strategic recommendations
+---
 
-- Logistics: Renegotiate contracts with carriers showing high delay rates.
-- Marketing: Prioritize high-revenue segments like Information Technology and
-  Telephony.
-- Conversion: Analyze order cancellations to optimize inventory management.
+## Execution Instructions
 
-## Project structure
+1. **Deploy Tables:**
+   ```bash
+   psql -U postgres -d ecommerce_dw -f sql/table-creation-postgres.txt
+   ```
+2. **Execute ETL:**
+   Open `etl/Job.kjb` in Pentaho Spoon and click **Run**.
+3. **Supervision:**
+   Connect Metabase to `ecommerce_dw` to explore the analytical dashboards.
 
-- `data/`: Source CSV files.
-- `etl/`: Pentaho transformations and jobs.
-- `sql/`: Database creation scripts.
-- `docs/`: Documentation and supplemental images.
+---
 
-Authored by Youssef Fellah.
-Developed for the Engineering Cycle at Mundiapolis University.
+## Technology Stack
+
+- **Database:** PostgreSQL
+- **ETL:** Pentaho Data Integration (Spoon 11)
+- **Analytics Visualization:** Metabase
+- **Operating Environment:** Fedora Linux
+
+---
+
+## Author
+
+- **Author:** Youssef Fellah ([ind4x_](https://github.com/ind4x))
+- **Institution:** Mundiapolis University, Engineering Cycle

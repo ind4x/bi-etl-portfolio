@@ -1,52 +1,99 @@
-# Medical center BI solution
+# Medical Center Healthcare BI Solution
 
-This project implements a complete decision-making chain for a medical center.
-It allows for the analysis of consultations, physician performance, patient
-satisfaction, and financial health.
+This project implements an end-to-end clinical and administrative decision-support
+system for a healthcare facility, analyzing patient consultations, physician workload,
+service efficiency, and financial streams using Pentaho PDI and PostgreSQL.
 
-## Project overview
+---
 
-The solution follows a standard data warehouse architecture:
-1. Sources: CSV files containing patient, physician, service, payment, and
-   consultation data.
-2. ETL: Pentaho Data Integration (PDI) for cleaning, transformation, and
-   loading.
-3. Storage: PostgreSQL database using a star schema.
-4. Visualization: Power BI for decision-making reports.
+## Project Structure
 
-## Directory structure
+```text
+medical-center-bi/
+├── README.md                          # Technical specification and architecture overview
+├── RESPONSE.md                        # Academic responses to project specification questions
+├── data/                              # Clinical raw operational records
+│   ├── patients.csv                   # Patient demographic records
+│   ├── medecins.csv                   # Physician identities and specializations
+│   ├── services.csv                   # Medical departments and service offerings
+│   ├── consultations.csv              # Patient consultation events and diagnosis logs
+│   └── paiements.csv                  # Financial settlement transactions
+├── scripts/sql/                       # Data Warehouse DDL Scripts
+│   └── CRÉATION DES TABLES.txt        # Table schemas for dimensions and facts
+├── etl/                               # Pentaho Kettle Transformation Pipelines
+│   ├── Transformation-dim_patient.ktr
+│   ├── Transformation-dim_medecin.ktr
+│   ├── Transformation-dim_service.ktr
+│   ├── Transformation-dim_paiement.ktr
+│   ├── Transformation-dim_temps.ktr
+│   └── Transformation-fact_consultation.ktr
+└── docs/                              # Project documentation and graphical deliverables
+    ├── reports/                       # Formal examination reports (PDF)
+    └── images/                        # Transformation execution diagrams and dashboard previews
+```
 
-- `data/`: Source CSV files.
-- `etl/`: Pentaho transformations.
-- `scripts/`: SQL scripts for database creation.
-- `docs/`: Documentation, schemas, and reports.
-- `RESPONSE.md`: Detailed responses to project requirements.
+### File Responsibilities
 
-## Configuration and installation
+- **`scripts/sql/CRÉATION DES TABLES.txt`**: Defines star schema tables with strict referential constraints.
+- **`etl/`**: Pentaho PDI data cleaning pipelines handling nulls, type conversions, and surrogate key lookups.
+- **`docs/reports/`**: Formal thesis report detailing healthcare KPIs and consultation wait times.
 
-### 1. Database setup
+---
 
-Run the SQL scripts to initialize the data warehouse structure, including the
-dimension tables (`dim_patient`, `dim_medecin`, `dim_service`, `dim_paiement`,
-`dim_temps`) and the fact table (`fact_consultation`).
+## Star Schema Architecture
 
-### 2. ETL process
+```text
+       +-----------------------+              +-----------------------+
+       |       dim_patient     |              |       dim_medecin     |
+       | - id_patient (PK)     |              | - id_medecin (PK)     |
+       | - nom, age, genre     |              | - nom, specialite     |
+       +-----------------------+              +-----------------------+
+                   \                              /
+                    \                            /
+              +----------------------------------------+
+              |           fact_consultation            |
+              | - id_consultation (PK)                 |
+              | - id_patient (FK)                      |
+              | - id_medecin (FK)                      |
+              | - id_service (FK)                      |
+              | - id_paiement (FK)                     |
+              | - id_temps (FK)                        |
+              | - cout, duree_consult, satisfaction    |
+              +----------------------------------------+
+                    /                            \
+                   /                              \
+       +-----------------------+              +-----------------------+
+       |       dim_service     |              |       dim_paiement    |
+       | - id_service (PK)     |              | - id_paiement (PK)    |
+       | - departement, batiment|             | - mode, statut        |
+       +-----------------------+              +-----------------------+
+```
 
-Execute the Pentaho transformations to load the dimension tables and the fact
-table. The process includes calculations for net amounts and delivery delays.
+---
 
-### 3. Visualization
+## Execution Instructions
 
-Connect Power BI to the PostgreSQL instance to view reports on activity,
-specialties, and service quality.
+1. **Initialize Relational Schema:**
+   ```bash
+   psql -U postgres -d clinic_dw -f "scripts/sql/CRÉATION DES TABLES.txt"
+   ```
+2. **Execute ETL Pipelines:**
+   Open each transformation in `etl/` inside Pentaho Spoon in dependency sequence (`dim_*` transformations first, followed by `fact_consultation`).
+3. **Connect Reporting Tool:**
+   Configure Power BI Desktop or Metabase to query `clinic_dw`.
 
-## Key performance indicators
+---
 
-- Global net revenue: Approximately 346,000 MAD.
-- Delay rate: 59.58%.
-- Non-payment rate: 21.92%.
-- Leading specialty: General Medicine.
-- Most active physician: Dr. Amina Bennani.
+## Technology Stack
 
-Authored by Youssef Fellah.
-Business Intelligence project.
+- **Database:** PostgreSQL
+- **ETL:** Pentaho Data Integration (PDI Spoon)
+- **Reporting:** Power BI Desktop
+- **Operating Environment:** Fedora Linux
+
+---
+
+## Author
+
+- **Author:** Youssef Fellah ([ind4x_](https://github.com/ind4x))
+- **Institution:** Mundiapolis University, Engineering Cycle

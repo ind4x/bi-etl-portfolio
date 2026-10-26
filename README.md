@@ -1,62 +1,62 @@
-# BI and ETL portfolio: data engineering and analytics
+# Business Intelligence & ETL Laboratory Portfolio
 
-This repository contains a collection of Business Intelligence (BI) and ETL
-laboratories and assignments. These projects demonstrate end-to-end data
-warehousing solutions.
+This repository hosts practical implementations, star schema data warehouse designs,
+and Kettle ETL orchestration pipelines developed for the Business Intelligence (BI)
+and Data Engineering curriculum at Mundiapolis University.
 
-## Repository structure
+---
 
-```text
-.
-├── labs/                        # Academic labs (Hotel BI project)
-│   ├── lab1/                    # BI foundations
-│   ├── lab2/                    # Data modeling and star schemas
-│   ├── lab3/                    # ETL processes and Pentaho basics
-│   └── lab4/                    # Final hotel data warehouse
-│       ├── business-requirements-04.pdf
-│       └── hotel-data-warehouse/ # Hotel analytics system
-│           ├── data-sources/    # Raw operational data
-│           ├── etl-pipeline/    # PDI/Kettle orchestration
-│           └── reports/         # KPI dashboards
-├── projects/                    # Major projects and assignments
-│   ├── e-commerce-bi-assignment/ # E-Commerce sales and logistics analysis
-│   │   ├── data/                # Raw CSV sources
-│   │   ├── etl/                 # Pentaho ETL transformations
-│   │   ├── sql/                 # Database schema (PostgreSQL)
-│   │   └── docs/                # Final report and visualizations
-│   └── medical-center-bi/       # Medical center analytics
-│       ├── data/                # Healthcare CSV datasets
-│       ├── etl/                 # Pentaho ETL transformations
-│       ├── scripts/             # SQL schema and scripts
-│       └── docs/                # Reports and dashboard screenshots
-└── LICENSE                      # Project license
-```
+## Laboratory Overview
 
-## Featured projects
+| Module | Category | Core Methodology | Primary Deliverables | Reference |
+| :--- | :--- | :--- | :--- | :--- |
+| **[hotel-data-warehouse](./labs/lab4/hotel-data-warehouse)** | Academic Lab | Star schema modeling, Pentaho PDI dimension-first loading, master `.kjb` job orchestration | Data warehouse & KPI dashboard | [Lab](./labs/lab4/hotel-data-warehouse/README.md) |
+| **[e-commerce-bi-assignment](./projects/e-commerce-bi-assignment)** | Major Project | E-Commerce logistics & sales analytics, carrier delivery delay metrics, Metabase visualization | PostgreSQL DW & Metabase charts | [Project](./projects/e-commerce-bi-assignment/README.md) |
+| **[medical-center-bi](./projects/medical-center-bi)** | Major Project | Healthcare consultation tracking, physician workload analytics, financial revenue metrics | Star schema DW & Power BI reports | [Project](./projects/medical-center-bi/README.md) |
 
-### 1. Hotel data warehouse (Lab 4)
+---
 
-- Location: `labs/lab4/hotel-data-warehouse/`
-- Focus: Centralizes fragmented hotel data into a unified star schema for
-  operational reporting.
-- Tech: Pentaho Data Integration, Star Schema, PowerBI.
+## General Running Instructions
 
-### 2. E-Commerce sales and logistics assignment
+### Prerequisites
 
-- Location: `projects/e-commerce-bi-assignment/`
-- Focus: Analyzes sales performance and logistics efficiency for an e-commerce
-  platform. This includes customer segmentation and carrier performance
-  tracking.
-- Tech: PostgreSQL, Pentaho (PDI), Metabase Dashboarding.
+- **Java Runtime:** OpenJDK 11 or 17 (required for Pentaho Data Integration / Kettle)
+- **Database:** PostgreSQL 14+ (Local instance or Docker container)
+- **ETL Tool:** Pentaho Data Integration (Spoon / Kitchen)
+- **Visualization:** Metabase or Power BI Desktop
 
-### 3. Medical center BI analysis
+### Setup and Environment
 
-- Location: `projects/medical-center-bi/`
-- Focus: Provides an end-to-end BI solution for a medical center, analyzing
-  consultations, patient flow, and payment tracking.
-- Tech: Pentaho Data Integration, Star Schema, Metabase Dashboarding.
+1. **Clone the repository:**
+   ```bash
+   git clone git@github.com:ind4x/bi-etl-portfolio.git
+   cd bi-etl-portfolio
+   ```
 
-  
+2. **Database Provisioning (PostgreSQL):**
+   Execute the target DDL table creation scripts located in each module's `sql/` or `scripts/sql/` directory:
+   ```bash
+   psql -U postgres -d postgres -f projects/e-commerce-bi-assignment/sql/table-creation-postgres.txt
+   ```
+
+3. **Executing ETL Jobs with Pentaho Kettle:**
+   * **Via GUI (Spoon):** Launch `spoon.sh` and open the desired `.kjb` job or `.ktr` transformation.
+   * **Headless execution (Kitchen):**
+     ```bash
+     kitchen.sh -file="projects/e-commerce-bi-assignment/etl/Job.kjb" -level=Basic
+     ```
+
+---
+
+## Technology Stack
+
+- **ETL Engine:** Pentaho Data Integration (PDI / Kettle Spoon 11)
+- **Relational Databases:** PostgreSQL
+- **Modeling Paradigms:** Dimensional Star Schema, Snowflaking, Kimball Methodology
+- **BI Visualization:** Metabase, Power BI Desktop
+
+---
+
 ## Author
 
 - **Author:** Youssef Fellah ([ind4x_](https://github.com/ind4x))
